@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: valora_db
+    restart: always
+
+    environment:
+      POSTGRES_USER: valora
+      POSTGRES_PASSWORD: valora23
+      POSTGRES_DB: valora
+
+    ports:
+    - "5433:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
