@@ -1,0 +1,131 @@
+# ================================
+# PYTHON
+# ================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribuição / build
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ================================
+# AMBIENTE VIRTUAL
+# ================================
+venv/
+env/
+ENV/
+.venv/
+
+# ================================
+# VARIÁVEIS DE AMBIENTE
+# ================================
+.env
+.env.*
+*.env
+
+# ================================
+# BANCO DE DADOS LOCAL
+# ================================
+*.db
+*.sqlite3
+
+# ================================
+# LOGS
+# ================================
+*.log
+logs/
+*.out
+
+# ================================
+# CACHE / TESTES
+# ================================
+.cache/
+.pytest_cache/
+coverage/
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+
+# ================================
+# IDEs / EDITORES
+# ================================
+
+# VSCode
+.vscode/
+
+# PyCharm / IntelliJ
+.idea/
+
+# Sublime / outros
+*.sublime-project
+*.sublime-workspace
+
+# ================================
+# SISTEMA OPERACIONAL
+# ================================
+.DS_Store
+Thumbs.db
+
+# ================================
+# FASTAPI / UVICORN
+# ================================
+*.pid
+*.sock
+
+# ================================
+# DOCKER
+# ================================
+.dockerignore
+docker-compose.override.yml
+
+# ================================
+# MIGRATIONS (Alembic - opcional)
+# ================================
+# Se quiser versionar migrations, COMENTE essa linha
+alembic/versions/*.py
+
+# ================================
+# NODE (caso tenha frontend junto)
+# ================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+pnpm-lock.yaml
+
+# ================================
+# SEGURANÇA (arquivos sensíveis)
+# ================================
+*.pem
+*.key
+*.crt
+*.pfx
+secrets.json
+config.yaml
+
+# ================================
+# OUTROS
+# ================================
+*.bak
+*.swp
+*.tmp
+*.temp
