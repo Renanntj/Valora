@@ -4,3 +4,4 @@ from .usuario import Usuario
 from .assinatura import Assinatura, StatusAssinatura
 from .paciente import Paciente
 from .agendamentos import Agendamento
+from .funcionarios import Funcionario

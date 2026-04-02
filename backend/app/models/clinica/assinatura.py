@@ -9,16 +9,15 @@ class StatusAssinatura(enum.Enum):
     INADIMPLENTE = "inadimplente" # Dado de vencimento
     CANCELADA = "cancelada"
     TRIAL = "trial" # Período de teste gratuito
-
 class Assinatura(Base):
     __tablename__ = "assinaturas"
     
     id = Column(Integer, primary_key=True, index=True)
-    clinica_id = Column(Integer, ForeignKey("clinicas.id"), unique=True) # Uma assinatura por clínica
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), unique=True)
     
-    plano_nome = Column(String) # Ex: "Plano Trimestral"
+    plano_nome = Column(String)
     valor_pago = Column(Float)
-    duracao_dias = Column(Integer) # 30, 60 ou 90 por enquanto, irei adicionar mais
+    duracao_dias = Column(Integer)
     
     data_inicio = Column(DateTime, default=datetime.datetime.now)
     data_vencimento = Column(DateTime, nullable=False)
@@ -26,4 +25,5 @@ class Assinatura(Base):
     status = Column(Enum(StatusAssinatura), default=StatusAssinatura.TRIAL)
     ultimo_pagamento = Column(DateTime, default=datetime.datetime.now)
 
-    clinica = relationship("Clinica", back_populates="assinatura")
+    
+    usuario = relationship("Usuario", back_populates="assinatura")
