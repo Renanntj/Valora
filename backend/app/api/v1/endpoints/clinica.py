@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.core.dependecies import get_db
+from app.core.dependecies import get_db, AdminUser
 from sqlalchemy.orm import Session
 from app.models.clinica.clinica import Clinica
 from app.schemas.clinica_schemas.schemas_clinica import Criar_Clinica_Schema
 from app.services.validar_cnpj import validar_cnpj
 router = APIRouter()
 
-@router.post("/criar-clinica")
-async def criar_clinica(data: Criar_Clinica_Schema, db: Session = Depends(get_db)): #nome #cpnj #ativa
+
+# so admin terá acesso
+@router.post("/criar-clinica", status_code=201)
+async def criar_clinica(current_admin: AdminUser, data: Criar_Clinica_Schema, db: Session = Depends(get_db)): #nome #cpnj #ativa
     verificar_clinica = db.query(Clinica).filter(Clinica.nome_fantasia==data.nome_fantasia).first()
     if verificar_clinica:
         raise HTTPException(status_code=400, detail="Clinica existente")
