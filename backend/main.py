@@ -62,7 +62,7 @@ else:
 app = FastAPI(
     title="Valora-API",
     version="1.0.0",
-    lifespan=lifespan  # Conecta a lógica de criação do admin aqui
+    
 )
 
 # ---------------------------------------------------------------------------
