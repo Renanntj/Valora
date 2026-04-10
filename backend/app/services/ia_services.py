@@ -1,30 +1,28 @@
-import os
-import google.generativeai as genai
+import google.generativeai as genai  # Importação correta
+from app.core.config import settings
 from .prompt import PROMPT_VALORA
+
 class IAService:
+    
+    genai.configure(api_key=settings.GEMINI_API_KEY)
+
     @staticmethod
     async def gerar_consultoria(dados: dict) -> str:
-    
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY não encontrada nas variáveis de ambiente.")
-            
-        genai.configure(api_key=api_key)
         
         
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel("gemini-2.5-flash-lite")
         
         
-        prompt = PROMPT_VALORA
-        
+        prompt_final = f"{PROMPT_VALORA}\n\nDados da Clínica: {dados}"
         
         try:
-            resposta = await model.generate_content_async(prompt)
+            
+            resposta = model.generate_content(prompt_final)
             return resposta.text
+            
         except Exception as e:
-        
-            print(f"Erro na API do Gemini: {e}")
+            print(f"Erro no Valora IA: {e}")
             return (
-                f"Identificamos um prejuízo de R$ {dados.get('perda_monetaria')} com faltas. "
-                "Recomendamos implementar confirmação de consultas com 24h de antecedência para mitigar essas perdas."
+                f"Prejuízo detectado: R$ {dados.get('perda_monetaria')}. "
+                "Recomendamos revisão das confirmações de agenda."
             )

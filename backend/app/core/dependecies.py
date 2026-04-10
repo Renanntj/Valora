@@ -163,9 +163,19 @@ def require_clinica_owner(
     Exige que o usuário seja o responsável pela clínica.
     Para o MVP, podemos considerar que qualquer usuário ativo da clínica 
     com permissão de gerência pode acessar.
+    Exige assinatura ativa OU que o usuário seja o Admin do SaaS.
     """
-    # Se você quiser ser restrito: adicione um campo 'is_owner' no model Usuario
-    # Por enquanto, garantimos que ele tem um vínculo com a clínica
+        
+    if user.is_admin_saas:
+        return user  
+
+
+    if not user.assinatura:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="Nenhuma assinatura encontrada. Contrate um plano para continuar.",
+        )
+    
     if not user.clinica_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -182,6 +192,6 @@ def require_clinica_owner(
 
 ActiveUser = Annotated[Usuario, Depends(get_current_active_user)]
 AdminUser = Annotated[Usuario, Depends(require_admin)]
-SubscriberUser = Annotated[Usuario, Depends(require_active_subscription)]
+SubscriberUser = Annotated[Usuario, Depends(require_clinica_owner)]
 DBSession = Annotated[Session, Depends(get_db)]
 ClinicaOwner = Annotated[Usuario, Depends(require_clinica_owner)]

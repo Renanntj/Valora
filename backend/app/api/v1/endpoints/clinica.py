@@ -26,5 +26,6 @@ async def criar_clinica(
     db.commit()
     
     return {
-        "message": f"{nova_clinica} adicionado com sucesso"
+    "message": f"Clínica {nova_clinica.nome_fantasia} adicionada com sucesso",
+    "id": nova_clinica.id
     }
