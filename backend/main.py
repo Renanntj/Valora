@@ -1,26 +1,51 @@
 """
 Entrypoint da aplicação FastAPI.
-
-- Campos comentados são para implimentações futuras
-
-Middlewares de segurança configurados:
-    - TrustedHostMiddleware: bloqueia requests com Host header inválido
-    - CORSMiddleware: restringe origens permitidas
-    - Security headers customizados (X-Content-Type-Options, etc.)
-
-Para produção:
-    - Configure ALLOWED_ORIGINS via variável de ambiente
-    - Rode atrás de um proxy reverso (nginx/caddy) com TLS
-    - Ative rate limiting no gateway (ex: nginx limit_req)
 """
 
+import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from app.core.config import settings
 from fastapi.responses import JSONResponse
-from app.api.v1.router import api_router
+from sqlalchemy import select
 
+
+from app.api.v1.router import api_router
+from app.core.database import SessionLocal   
+from app.models.clinica.usuario import Usuario          
+from app.core.security import hash_password
+
+# ---------------------------------------------------------------------------
+# Lógica de Inicialização (Criação do Admin)
+# ---------------------------------------------------------------------------
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # O que acontece ao ligar o servidor:
+    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+
+    if admin_email and admin_password:
+        async with SessionLocal() as session:
+            # Verifica se o admin já existe
+            result = await session.execute(select(Usuario).filter(Usuario.email == admin_email))
+            user = result.scalars().first()
+            
+            if not user:
+                new_admin = User(
+                    email=admin_email,
+                    hashed_password=hash_password(admin_password),
+                    is_admin=True  
+                )
+                session.add(new_admin)
+                await session.commit()
+                print(f">>> [SUCESSO] Admin {admin_email} criado!")
+            else:
+                print(">>> [INFO] Admin já existe no banco.")
+    
+    yield
+    
+    pass
 
 # ---------------------------------------------------------------------------
 # Instância da aplicação
@@ -29,43 +54,12 @@ from app.api.v1.router import api_router
 app = FastAPI(
     title="Valora-API",
     version="1.0.0",
-    # Em produção, desabilite a documentação automática ou proteja com auth
-    # docs_url="/docs" if settings.is_development else None,
-    # redoc_url="/redoc" if settings.is_development else None,
-    # openapi_url="/openapi.json" if settings.is_development else None,
+    lifespan=lifespan  # Conecta a lógica de criação do admin aqui
 )
 
 # ---------------------------------------------------------------------------
-# Middlewares de segurança
+# Middlewares
 # ---------------------------------------------------------------------------
-
-# if not settings.is_development:
-#     app.add_middleware(
-#         TrustedHostMiddleware,
-#         allowed_hosts=["seudominio.com.br", "www.seudominio.com.br"],
-#     )
-
-# 2. CORS — ajuste allowed_origins para seus domínios reais
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["https://seudominio.com.br"] if not settings.is_development else ["*"],
-#     allow_credentials=True,
-#     allow_methods=["GET", "POST", "PATCH", "DELETE"],
-#     allow_headers=["Authorization", "Content-Type"],
-# )
-
-
-# 3. Security headers — aplicados em toda resposta
-# @app.middleware("http")
-# async def add_security_headers(request: Request, call_next) -> Response:
-#     response: Response = await call_next(request)
-#     response.headers["X-Content-Type-Options"] = "nosniff"
-#     response.headers["X-Frame-Options"] = "DENY"
-#     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-#     response.headers["Permissions-Policy"] = "geolocation=(), microphone=()"
-#     if not settings.is_development:
-#         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-#     return response
 
 app.add_middleware(
     CORSMiddleware,
@@ -77,16 +71,9 @@ app.add_middleware(
 
 app.include_router(api_router, prefix="/api/v1")
 
-
 # ---------------------------------------------------------------------------
-# Health check
+# Rotas Base
 # ---------------------------------------------------------------------------
-
-# @app.get("/health", tags=["Infraestrutura"], include_in_schema=False)
-# def health_check() -> dict:
-#     """Endpoint para health checks de load balancers e orquestradores."""
-#     return {"status": "ok"}
-
 
 @app.get("/", tags=["Root"])
 def root():
