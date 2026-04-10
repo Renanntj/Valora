@@ -106,6 +106,7 @@ def login(
         access_token=access_token,
         refresh_token=refresh_token,
         expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        user=user
     )
 
 

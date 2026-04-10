@@ -57,7 +57,8 @@ class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
-    expires_in: int  # segundos até expirar o access token
+    expires_in: int 
+    user: UsuarioPublic
 
 
 class RefreshRequest(BaseModel):

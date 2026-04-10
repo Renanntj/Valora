@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Valora — Inteligência operacional para clínicas de saúde.">
+  <meta name="theme-color" content="#080d18">
+
+  <title>Valora — Inteligência para Clínicas</title>
+
+  <!-- Favicon inline SVG -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23c9a84c'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='Georgia,serif' font-size='20' font-weight='700' fill='%23080d18'>V</text></svg>">
+
+  <!-- Design System -->
+  <link rel="stylesheet" href="css/design-system.css">
+  <!-- Estilos das páginas -->
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body>
+
+  <!-- Mount point da SPA -->
+  <div id="app"></div>
+
+  <!-- Toast container (criado via JS) -->
+
+  <!-- ── Scripts ── -->
+
+  <!-- 1. API Service Layer -->
+  <script src="js/api.js"></script>
+
+  <!-- 2. Utilitários e Router -->
+  <script src="js/utils.js"></script>
+
+  <!-- 3. Componentes (Sidebar, Topbar) -->
+  <script src="js/sidebar.js"></script>
+
+  <!-- 3.5 Formatter -->
+  <script src="js/formatter.js"></script>
+
+  <!-- 4. Páginas -->
+  <script src="pages/login.js"></script>
+  <script src="pages/dashboard.js"></script>
+  <script src="pages/analise.js"></script>
+  <script src="pages/assinatura.js"></script>
+  <script src="pages/admin.js"></script>
+
+  <!-- 5. Boot da aplicação -->
+  <script>
+    /* ════════════════════════════════════════
+       VALORA — Boot da Aplicação
+       ════════════════════════════════════════ */
+
+    // ── Registro de rotas ──
+    Router.register('login',          renderLogin);
+    Router.register('dashboard',      renderDashboard);
+    Router.register('analise',        renderAnalise);
+    Router.register('assinatura',     renderAssinatura);
+    Router.register('perfil',         renderPerfil);
+
+    // Admin
+    Router.register('admin-dashboard',  renderAdminDashboard);
+    Router.register('clinicas',         renderClinicas);
+    Router.register('assinaturas',      renderAdminAssinaturas);
+    Router.register('usuarios',         renderAdminUsuarios);
+    Router.register('relatorios',       renderAdminRelatorios);
+    Router.register('configuracoes',    renderAdminConfiguracoes);
+
+    // 404
+    Router.register('404', () => {
+      document.getElementById('app').innerHTML = `
+        <div class="page-404">
+          <div class="error-code">404</div>
+          <h2 style="font-family:var(--font-display)">Página não encontrada</h2>
+          <p>A rota que você tentou acessar não existe.</p>
+          <button class="btn btn-outline" onclick="Router.go(Auth.isLoggedIn() ? 'dashboard' : 'login')">
+            ← Voltar ao início
+          </button>
+        </div>`;
+    });
+
+    // ── Perfil (placeholder) ──
+    function renderPerfil() {
+      if (!requireAuth()) return;
+      const role = getUserRole() || 'clinica';
+      const user = Auth.getUser() || {};
+      document.getElementById('app').innerHTML = `
+        ${Sidebar.build(role, 'perfil')}
+        ${buildUserModal()}
+        <div class="main-content">
+          ${buildTopbar('Meu Perfil', 'Configurações da conta')}
+          <div class="page-body">
+            <div class="page-header animate-fade-up">
+              <h2>Meu Perfil</h2>
+            </div>
+            <div class="two-col">
+              <div class="card animate-fade-up stagger-1">
+                <h3 style="margin-bottom:1.25rem">Informações da Conta</h3>
+                <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)">
+                  <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--v-700),var(--v-600));border:2px solid var(--border-md);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:700;color:var(--g-400);font-family:var(--font-display)">
+                    ${(user.nome || user.email || 'U').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style="font-size:1.1rem;font-weight:600;color:var(--text-1)">${user.nome || '—'}</div>
+                    <div style="font-size:0.85rem;color:var(--text-3)">${user.email || '—'}</div>
+                    <div style="margin-top:0.3rem">${statusBadge('ativo')}</div>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.85rem">
+                  <div class="form-group"><label class="form-label">Nome</label><input class="input" value="${user.nome || ''}" placeholder="Seu nome completo"></div>
+                  <div class="form-group"><label class="form-label">E-mail</label><input class="input" value="${user.email || ''}" disabled></div>
+                  <div class="form-group"><label class="form-label">Perfil</label><input class="input" value="${user.role || 'clinica'}" disabled></div>
+                </div>
+                <div style="margin-top:1.25rem">
+                  <button class="btn btn-primary" onclick="Toast.info('Em breve: edição de perfil.')">Salvar alterações</button>
+                </div>
+              </div>
+              <div class="card animate-fade-up stagger-2">
+                <h3 style="margin-bottom:1rem">Segurança</h3>
+                <div style="display:flex;flex-direction:column;gap:0.85rem">
+                  <div class="form-group"><label class="form-label">Senha atual</label><input class="input" type="password" placeholder="••••••••"></div>
+                  <div class="form-group"><label class="form-label">Nova senha</label><input class="input" type="password" placeholder="••••••••"></div>
+                  <div class="form-group"><label class="form-label">Confirmar nova senha</label><input class="input" type="password" placeholder="••••••••"></div>
+                </div>
+                <div style="margin-top:1.25rem">
+                  <button class="btn btn-outline" onclick="Toast.info('Em breve: troca de senha.')">Atualizar senha</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      Sidebar.bindEvents();
+      bindLogout();
+      bindMenuToggle();
+    }
+
+    // ── Inicializa a aplicação ──
+    Router.init();
+  </script>
+</body>
+</html>
