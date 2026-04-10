@@ -19,33 +19,41 @@ from app.core.security import hash_password
 # Lógica de Inicialização (Criação do Admin)
 # ---------------------------------------------------------------------------
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # O que acontece ao ligar o servidor:
-    admin_email = os.getenv("ADMIN_EMAIL")
-    admin_password = os.getenv("ADMIN_PASSWORD")
+async def ensure_admin():
+    email = os.getenv("ADMIN_EMAIL")
+    password = os.getenv("ADMIN_PASSWORD")
+    
+    if not email or not password:
+        print(">>> [AVISO] Variáveis ADMIN_EMAIL ou ADMIN_PASSWORD não encontradas.")
+        return
 
-    if admin_email and admin_password:
+    try:
         async with SessionLocal() as session:
-            # Verifica se o admin já existe
-            result = await session.execute(select(Usuario).filter(Usuario.email == admin_email))
+            print(f">>> Verificando admin: {email}")
+            result = await session.execute(select(Usuario).filter(Usuario.email == email))
             user = result.scalars().first()
             
             if not user:
-                new_admin = User(
-                    email=admin_email,
-                    hashed_password=hash_password(admin_password),
-                    is_admin=True  
+                new_admin = Usuario(
+                    email=email,
+                    hashed_password=hash_password(password),
+                    is_admin=True
                 )
                 session.add(new_admin)
                 await session.commit()
-                print(f">>> [SUCESSO] Admin {admin_email} criado!")
+                print(">>> [SUCESSO] Admin criado agora!")
             else:
                 print(">>> [INFO] Admin já existe no banco.")
-    
-    yield
-    
-    pass
+    except Exception as e:
+        print(f">>> [ERRO CRÍTICO NO ADMIN]: {e}")
+
+
+import asyncio
+loop = asyncio.get_event_loop()
+if loop.is_running():
+    asyncio.ensure_future(ensure_admin())
+else:
+    loop.run_until_complete(ensure_admin())
 
 # ---------------------------------------------------------------------------
 # Instância da aplicação
