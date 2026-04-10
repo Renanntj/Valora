@@ -130,5 +130,5 @@ config.yaml
 *.tmp
 *.temp
 
-criar_user.py
+
 teste_ia.py
