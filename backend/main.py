@@ -67,6 +67,14 @@ app = FastAPI(
 #         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
 #     return response
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
+)
+
 app.include_router(api_router, prefix="/api/v1")
 
 
@@ -98,3 +106,7 @@ def root():
             "documentacao": "/docs"
         }
     )
+    
+@app.get("/healthz", tags=["Infraestrutura"], include_in_schema=False)
+def health_check() -> dict:
+    return {"status": "ok"}
