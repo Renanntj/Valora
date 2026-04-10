@@ -18,6 +18,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from app.core.config import settings
+from fastapi.responses import JSONResponse
 from app.api.v1.router import api_router
 
 
@@ -77,3 +78,23 @@ app.include_router(api_router, prefix="/api/v1")
 # def health_check() -> dict:
 #     """Endpoint para health checks de load balancers e orquestradores."""
 #     return {"status": "ok"}
+
+
+@app.get("/", tags=["Root"])
+def root():
+    return JSONResponse(
+        content={
+            "projeto": "Valora SaaS",
+            "status": "Online",
+            "versao": "1.0.0",
+            "desenvolvedor": {
+                "nome": "Renan A.",
+                "cargo": "Backend Developer",
+                "contato": "renannalves334@gmail.com",
+                "linkedin": "https://www.linkedin.com/in/renanalves433/",
+                "github": "https://github.com/Renanntj",
+                "portifolio": "https://renanntj.github.io/Renan-Alves/"
+            },
+            "documentacao": "/docs"
+        }
+    )

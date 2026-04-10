@@ -131,3 +131,4 @@ config.yaml
 *.temp
 
 criar_user.py
+prompt.py

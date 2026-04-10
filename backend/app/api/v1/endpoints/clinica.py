@@ -7,7 +7,6 @@ from app.services.validar_cnpj import validar_cnpj
 from typing import Annotated
 router = APIRouter()
 
-
 # so admin terá acesso
 @router.post("/criar-clinica", status_code=201)
 async def criar_clinica(

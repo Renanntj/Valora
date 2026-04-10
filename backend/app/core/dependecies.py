@@ -156,6 +156,24 @@ def require_active_subscription(
         )
 
     return user
+def require_clinica_owner(
+    user: Annotated[Usuario, Depends(get_current_active_user)],
+) -> Usuario:
+    """
+    Exige que o usuário seja o responsável pela clínica.
+    Para o MVP, podemos considerar que qualquer usuário ativo da clínica 
+    com permissão de gerência pode acessar.
+    """
+    # Se você quiser ser restrito: adicione um campo 'is_owner' no model Usuario
+    # Por enquanto, garantimos que ele tem um vínculo com a clínica
+    if not user.clinica_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Usuário não vinculado a uma clínica operacional.",
+        )
+    return user
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -166,3 +184,4 @@ ActiveUser = Annotated[Usuario, Depends(get_current_active_user)]
 AdminUser = Annotated[Usuario, Depends(require_admin)]
 SubscriberUser = Annotated[Usuario, Depends(require_active_subscription)]
 DBSession = Annotated[Session, Depends(get_db)]
+ClinicaOwner = Annotated[Usuario, Depends(require_clinica_owner)]
